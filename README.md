@@ -22,4 +22,4 @@ The Cataloguing Open Access Classics Serials (COACS) project will leverage the v
   
  **Project progress and notes:**
  
-  * [Feb–May 2017 notes](notes/notes201702-05.txt)
+  * [Feb–May 2017 notes](notes/notes201702-05.md)
