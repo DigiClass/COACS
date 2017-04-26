@@ -13,13 +13,17 @@ The Cataloguing Open Access Classics Serials (COACS) project will leverage the v
  * [ICS project announcement](http://ics.sas.ac.uk/about-us/news/cataloguing-open-access-classics-serials)
  * [Stoa blog post](http://www.stoa.org/archives/2381)
  
- **Partner institutions:**
+**Partner institutions:**
  
-  * Institute of Classical Studies and Hellenic and Roman Societies Combined Library
-  * Warburg Institute, School of Advanced Study, London
-  * Institute for the Study of the Ancient World, New York University
-  * Pennsylvania State University Library
+ * Institute of Classical Studies and Hellenic and Roman Societies Combined Library
+ * Warburg Institute, School of Advanced Study, London
+ * Institute for the Study of the Ancient World, New York University
+ * Pennsylvania State University Library
   
  **Project progress and notes:**
  
-  * [Feb–May 2017 notes](notes/notes201702-05.md)
+ * [Feb–May 2017 notes](notes/notes201702-05.md)
+  
+**This repository contains:**
+
+ * tba
