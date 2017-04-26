@@ -20,8 +20,10 @@ The Cataloguing Open Access Classics Serials (COACS) project will leverage the v
  * Institute for the Study of the Ancient World, New York University
  * Pennsylvania State University Library
   
- **Project progress and notes:**
- 
+**Project progress and notes:**
+
+ * [Project outline](notes/outline.md)
+ * [Useful links](notes/useful_links.md)
  * [Feb–May 2017 notes](notes/notes201702-05.md)
   
 **This repository contains:**
