@@ -90,7 +90,7 @@ class Article():
         #logger.debug('article id: "{0}"'.format(self.id))
 
         # title of blog post should be same as title of atom entry
-        raw_title = unicode(root.find('{http://www.w3.org/2005/Atom}title').text)
+        raw_title = str(root.find('{http://www.w3.org/2005/Atom}title').text)
         try:
             self.title = purify_text(normalize_space(unicodedata.normalize('NFC', raw_title)))
         except TypeError:
@@ -103,7 +103,7 @@ class Article():
 
         # get url of blog post (html alternate)
         try:
-            raw_url = unicode(root.xpath("//*[local-name()='link' and @rel='alternate']")[0].get('href'))
+            raw_url = str(root.xpath("//*[local-name()='link' and @rel='alternate']")[0].get('href'))
         except IndexError:
             msg = 'could not extract blog post URL for article with id: "{0}"'.format(self.id)
             raise RuntimeError(msg)
@@ -121,12 +121,12 @@ class Article():
                     raise RuntimeError(msg)
 
         # capture categories as vocabulary terms
-        self.categories = [{'vocabulary' : c.get('scheme'), 'term' : normalize_space(unicodedata.normalize('NFC', unicode(c.get('term'))))} for c in root.findall('{http://www.w3.org/2005/Atom}category')]
+        self.categories = [{'vocabulary' : c.get('scheme'), 'term' : normalize_space(unicodedata.normalize('NFC', str(c.get('term'))))} for c in root.findall('{http://www.w3.org/2005/Atom}category')]
 
         # extract content, normalize, and parse as HTML for later use
         raw_content = root.find('{http://www.w3.org/2005/Atom}content').text
         soup = BeautifulSoup(raw_content, 'lxml')   # mainly to convert character entities to unicode
-        soup_content = unicode(soup)
+        soup_content = str(soup)
         del soup
         content = unicodedata.normalize('NFC', soup_content)
         del soup_content
@@ -139,7 +139,7 @@ class Article():
             msg = 'XMLSyntaxError while trying to parse content of {0}; trying html5lib parser with BeautifulSoup and then lxml parser with recover=True'.format(atom_file_name)
             logger.warning(msg)
             soup = BeautifulSoup(raw_content, 'html5lib')
-            soup_content = unicode(soup)
+            soup_content = str(soup)
             del soup
             content = unicodedata.normalize('NFC', soup_content)
             del soup_content

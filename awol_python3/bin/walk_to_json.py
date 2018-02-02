@@ -49,10 +49,15 @@ def main (args):
     resources = None
     index = {}
     parsers = AwolParsers()
-    for dir_name, sub_dir_list, file_list in os.walk(root_dir):
+    logger.info(list(os.walk(root_dir)))
+    for dir_name, sub_dir_list, file_list in os.walk(root_dir):  #ask Tom
+        logger.info("Blah3")
         if resources is not None:
+            logger.info("Blah2")
             del resources
+        
         for file_name in file_list:
+            logger.info("Blah4")
             if 'post-' in file_name and file_name[-4:] == '.xml':
                 walk_count = walk_count + 1
                 if args.progress and walk_count % 50 == 1:
@@ -193,7 +198,7 @@ def main (args):
     logger.info("Highest number of redundancies (collisions): {0}".format(max_collisions))
     logger.info("Total number of redundant records: {0}".format(total_collisions))
     try:
-    logger.info("Percentage of redundantly recorded resources:  {0:.2f}".format(round(float(redundant_resources)/float(resource_count)*100.0),2))
+        logger.info("Percentage of redundantly recorded resources:  {0:.2f}".format(round(float(redundant_resources)/float(resource_count)*100.0),2))
     except ZeroDivisionError:
         print("No records!")
 if __name__ == "__main__":

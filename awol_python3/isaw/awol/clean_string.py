@@ -170,10 +170,10 @@ def purify_text(raw):
     """Out vile jelly!"""
 
     raw_type = type(raw)
-    if raw_type == unicode:
+    if raw_type == str:
         cooked = raw
-    elif raw_type == str:
-        cooked = unicode(raw)
+    #elif raw_type == str:
+        #cooked = unicode(raw)
     else:
         raise TypeError(u'purify_text does not support arguments of type {0}'.format(raw_type))
     cooked = RX_DASHES.sub(u'-', cooked)       # regularize dashes and hyphens
@@ -186,10 +186,10 @@ def purify_html(raw):
     
     logger = logging.getLogger(sys._getframe().f_code.co_name)
     raw_type = type(raw)
-    if raw_type == unicode:
+    if raw_type == str:
         cooked = raw
-    elif raw_type == str:
-        cooked = unicode(raw)
+    #elif raw_type == str:
+        #cooked = unicode(raw)
     else:
         raise TypeError(u'purify_html does not support arguments of type {0}'.format(raw_type))
     cooked = purify_text(cooked)
@@ -214,7 +214,7 @@ def ukey(raw):
     if raw_type == list:
         uraw = u' '.join([unicode(chunk) for chunk in raw])
     elif raw_type == str:
-        uraw = unicode(raw)
+        uraw = str(raw)
     elif raw_type == unicode:
         uraw = raw
     else:
