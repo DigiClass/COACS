@@ -1,0 +1,82 @@
+Gets all the files from the AWON json directory
+
+find . -name '*.json' -exec cat {} \;
+
+Cat all the files, and pipe the output inton the 'jq' command line.
+jq parses the json and outputs all the languages first values into the langs.txt file.
+
+find . -name '*.json' -exec cat {} \; | jq '.languages[0]' > ../langs.txt 
+
+Then sort and deduplicate the langs.txt to get a list of all 2 character language values:
+
+ sort langs.txt| uniq > uniqlangs.txt
+
+ Here's the output:
+
+ cat uniqlangs.txt
+
+"af"
+"an"
+"ar"
+"az"
+"be"
+"bg"
+"br"
+"bs"
+"ca"
+"cs"
+"cy"
+"da"
+"de"
+"el"
+"en"
+"eo"
+"es"
+"et"
+"eu"
+"fa"
+"fi"
+"fo"
+"fr"
+"gl"
+"he"
+"hr"
+"hu"
+"id"
+"it"
+"ita"
+"ja"
+"jv"
+"ka"
+"ko"
+"ku"
+"ky"
+"la"
+"lb"
+"lo"
+"lt"
+"lv"
+"mg"
+"mk"
+"mr"
+"mt"
+"nl"
+"no"
+"oc"
+"pl"
+"pt"
+"ro"
+"ru"
+"sk"
+"sl"
+"sr"
+"sv"
+"sw"
+"tl"
+"tr"
+"uk"
+"ur"
+"vi"
+"wa"
+"zh"
+null
