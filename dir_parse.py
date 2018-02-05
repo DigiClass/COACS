@@ -1,8 +1,6 @@
-
-# coding: utf-8
-
-# In[ ]:
-
+#!/usr/bin/env python3
+import argparse
+import os
 # map from IANA 2-character language codes to ISO639-2 3-character language codes, as used in MARC
 
 lang_map = {
@@ -74,7 +72,7 @@ lang_map = {
 
 
 
-# In[ ]:
+# In[6]:
 
 
 # extract relevant bibliographic information from the AWOL index json dump 
@@ -85,94 +83,15 @@ import json
 import re
 from pymarc import Record, Field
 from pymarc import MARCReader
+import time
+from datetime import timedelta
 
-#open multiple files from Input directory  - change according to your system
-#infiles = glob.glob("Input/*.json")
-infiles = get_ipython().getoutput("find /Users/simonastoyanova/Desktop/awol-json -name '*.json'")
-
-def create_subordinate_records(parent_record, subordinate_data_list):
-    '''If a journal record includes a list of individual issues or volumes,    this function creates separate marc files for each of those issues or volumes. The journal title and url    are taken from the parent record (the journal record) and kept in the subordinate records.'''
-    result_list = []
-
-    for subordinate_resource in subordinate_data_list:
-        sub_record = Record(force_utf8=True)
-
-        # add fields 006, 007 and 008 with minimal physical information to every marc file
-        if 'title_full' in subordinate_resource:
-            sub_record.add_field(
-                Field(
-                    tag = '006',
-                    data = "m"))   
-            sub_record.add_field(
-                Field(
-                    tag = '007',
-                    data = "cr"))
-            
-            # the iana language code from the json file is taken, checked against the list of language codes,
-            # substituted with its iso639-2 equivalent and put in position 21-24 of the field 008 content
-            field008val = "            o       0eng d" # DEFAULT ENG
-            if 'languages' in parent_record and parent_record['languages'] is not None:
-                field008val = field008val[0:21] + lang_map.get(parent_record['languages'][0], "   ") + field008val[24:]
-                
-            sub_record.add_field(
-                Field(
-                    tag = '008',
-                    data = field008val))
-            
-    
-            sub_record.add_field(
-                Field(
-                    tag='245',
-                    indicators=['0', '0'],
-                    subfields=['a', subordinate_resource['title_full'][:9000]]
-                    )
-            )
-            sub_record.add_field(
-                Field(
-                    tag='506',
-                    indicators=['0', '#'],
-                    subfields=["a", "Open access"])
-            )
-
-        if parent_record['246']['a']:
-            sub_record.add_field(
-                Field(
-                    tag='490',
-                    indicators=['0', '0'],
-                    subfields=['a', parent_record['246']['a']])
-            )
-
-        
-        # put together the issue/volume url, the journal url and the domain in field 856; 
-        # domain and journal url taken from the parent record, issue/volume url taken from the subordinate record
-        if 'url' in subordinate_resource:
-            current_field = Field(
-                tag='856',
-                indicators=['0', '0']
-            )
-
-            current_field.add_subfield('u', subordinate_resource['url'])
-
-            if parent_record['856']['a']:
-                current_field.add_subfield('a', parent_record['856']['a'])
-
-            if parent_record['856']['u']:
-                current_field.add_subfield('d', parent_record['856']['u'])
-
-            sub_record.add_field(
-                current_field
-            )
-
-        result_list.append(sub_record)
-
-    return result_list
-
+start_time = time.time()
 
 # marc fields for each journal record
-
-for file in infiles:
-    print('Processing: ' + file)  #progress message
-    data = json.load(open(file)) 
+def json_to_marc(infilename, outfilename):
+    print('Processing: ' + infilename)  #progress message
+    data = json.load(open(infilename, "r"))
     record = Record(force_utf8=True)   #create MARC record, enforce Unicode 
     
     # add fields 006, 007 and 008 with minimal physical information to every marc file
@@ -289,44 +208,121 @@ for file in infiles:
                 tag='866',
                 indicators=['0', '0'],
                 subfields=["a", data["volume"]]))
-        
-    
-    
-    slash = file.rfind("/")   #keep filename when creating the marc files
-    dot = file.rfind(".")
-    
-    # execute function for creating separate records for subordinate resources
-    if data['subordinate_resources'] is not None: 
-        subordinate_records = create_subordinate_records(record, data['subordinate_resources'])
 
-        counter = 0
-        
-        # add counter and "-sub" to filenames of subordinate records
-        for subordinate_record in subordinate_records:
-            out = open('Output/'+file[slash+1:dot]+'-sub'+str(counter)+'.marc', 'wb')
-            out.write(subordinate_record.as_marc())
-            out.close()
+def create_subordinate_records(parent_record, subordinate_data_list):
+	'''If a journal record includes a list of individual issues or volumes,    this function creates separate marc files for each of those issues or volumes. The journal title and url    are taken from the parent record (the journal record) and kept in the subordinate records.'''
+	result_list = []
+	
+	for subordinate_resource in subordinate_data_list:
+		sub_record = Record(force_utf8=True)
 
-            counter = counter + 1
+		# add fields 006, 007 and 008 with minimal physical information to every marc file
+		if 'title_full' in subordinate_resource:
+			sub_record.add_field(
+				Field(
+					tag = '006',
+					data = "m"))   
+			sub_record.add_field(
+				Field(
+					tag = '007',
+					data = "cr"))
+			
+			# the value of field 008 is taken from the parent record and put into the subordinate one
+			field008val = "            o       0eng d" # DEFAULT ENG
+			if 'languages' in parent_record and parent_record['languages'] is not None:
+				field008val = field008val[0:21] + lang_map.get(parent_record['languages'][0], "   ") + field008val[24:]
+			
+				
+			sub_record.add_field(
+				Field(
+					tag = '008',
+					data = field008val))
+			
+	
+			sub_record.add_field(
+				Field(
+					tag='245',
+					indicators=['0', '0'],
+					subfields=['a', subordinate_resource['title_full'][:9000]]
+					)
+			)
+			sub_record.add_field(
+				Field(
+					tag='506',
+					indicators=['0', '#'],
+					subfields=["a", "Open access"])
+			)
 
+		if parent_record['246']['a']:
+			sub_record.add_field(
+				Field(
+					tag='490',
+					indicators=['0', '0'],
+					subfields=['a', parent_record['246']['a']])
+			)
+
+		
+		# put together the issue/volume url, the journal url and the domain in field 856; 
+		# domain and journal url taken from the parent record, issue/volume url taken from the subordinate record
+		if 'url' in subordinate_resource:
+			current_field = Field(
+				tag='856',
+				indicators=['0', '0']
+			)
+
+			current_field.add_subfield('u', subordinate_resource['url'])
+
+			if parent_record['856']['a']:
+				current_field.add_subfield('a', parent_record['856']['a'])
+
+			if parent_record['856']['u']:
+				current_field.add_subfield('d', parent_record['856']['u'])
+
+			sub_record.add_field(
+				current_field
+			)
+
+		result_list.append(sub_record)
+
+	return result_list
+   
+   
     #output marc file with same filename in Output directory
-    out = open('Output/'+file[slash+1:dot]+'.marc', 'wb') 
-    out.write(record.as_marc())
-    out.close()
+	out = open(outfilename, 'wb')
+	out.write(record.as_marc())
+	out.close()
+	
+	# execute function for creating separate records for subordinate resources
+	if data['subordinate_resources'] is not None: 
+		subordinate_records = create_subordinate_records(record, data['subordinate_resources'])
+	
+		counter = 0
+		
+		# add counter and "-sub" to filenames of subordinate records
+		for subordinate_record in subordinate_records:
+			out = open(outfilename+'-sub'+str(counter), 'wb')
+			out.write(subordinate_record.as_marc())
+			out.close()
 
-get_ipython().magic('time #calculate time of operation')
+		counter = counter + 1
 
-
-#for all marc files in Output folder
-outfiles = glob.glob("Output/*.marc")
-
-#print all new files with their filenames
-for marc in outfiles:
-    print(marc)
-    with open(marc, 'rb') as f:
-        reader = MARCReader(f)
-        record = next(reader)
-        record.as_dict()
-        print(record)
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser(description='json to marc')
+	parser.add_argument('input_dir', type=str,
+						help='put path to input directory')
+	parser.add_argument('out_dir',
+						help='put path to output direct0ry')
+	
+	args = parser.parse_args()
+	
+	for parent, dir_names, file_names in os.walk(args.input_dir):
+		for fn in file_names:
+			infilepath = os.path.join(parent, fn)
+			marc_fn = fn.replace(".json", ".marc")
+			outfilepath = os.path.join(args.out_dir, marc_fn)
+			
+			print(infilepath, outfilepath)
+			json_to_marc(infilepath, outfilepath)
+				
 
 
