@@ -198,16 +198,37 @@ def json_to_marc(infilename, outfilename):
 
         if data['url']:
             field.add_subfield('u',  data['url'])
-        
+
 
         record.add_field(field)
-        
-    if data["volume"]:
-        record.add_field(
-            Field(
+
+        if data["volume"]:
+            record.add_field(
+                Field(
                 tag='866',
                 indicators=['0', '0'],
-                subfields=["a", data["volume"]]))
+                subfields=["a", data["volume"]])
+            )
+
+        #output marc file with same filename in Output directory
+        out = open(outfilename, 'wb')
+        out.write(record.as_marc())
+        out.close()	
+
+        # execute function for creating separate records for subordinate resources
+        if data['subordinate_resources'] is not None: 
+            subordinate_records = create_subordinate_records(record, data['subordinate_resources'])
+
+        counter = 0
+
+        # add counter and "-sub" to filenames of subordinate records
+        for subordinate_record in subordinate_records:
+            out = open(outfilename.replace(".marc", "-sub"+str(counter)+".marc"), 'wb')
+            out.write(subordinate_record.as_marc())
+            out.close()
+            counter = counter + 1
+
+
 
 def create_subordinate_records(parent_record, subordinate_data_list):
 	'''If a journal record includes a list of individual issues or volumes,    this function creates separate marc files for each of those issues or volumes. The journal title and url    are taken from the parent record (the journal record) and kept in the subordinate records.'''
@@ -285,26 +306,7 @@ def create_subordinate_records(parent_record, subordinate_data_list):
 		result_list.append(sub_record)
 
 	return result_list
-   
-   
-    #output marc file with same filename in Output directory
-	out = open(outfilename, 'wb')
-	out.write(record.as_marc())
-	out.close()
-	
-	# execute function for creating separate records for subordinate resources
-	if data['subordinate_resources'] is not None: 
-		subordinate_records = create_subordinate_records(record, data['subordinate_resources'])
-	
-		counter = 0
-		
-		# add counter and "-sub" to filenames of subordinate records
-		for subordinate_record in subordinate_records:
-			out = open(outfilename+'-sub'+str(counter), 'wb')
-			out.write(subordinate_record.as_marc())
-			out.close()
 
-		counter = counter + 1
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='json to marc')
@@ -317,12 +319,13 @@ if __name__ == "__main__":
 	
 	for parent, dir_names, file_names in os.walk(args.input_dir):
 		for fn in file_names:
-			infilepath = os.path.join(parent, fn)
-			marc_fn = fn.replace(".json", ".marc")
-			outfilepath = os.path.join(args.out_dir, marc_fn)
-			
-			print(infilepath, outfilepath)
-			json_to_marc(infilepath, outfilepath)
+			if fn.endswith(".json" ):
+				infilepath = os.path.join(parent, fn)
+				marc_fn = fn.replace(".json", ".marc")
+				outfilepath = os.path.join(args.out_dir, marc_fn)
+				
+				print(infilepath, outfilepath)
+				json_to_marc(infilepath, outfilepath)
 				
 
 
