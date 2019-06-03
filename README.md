@@ -28,4 +28,16 @@ The Cataloguing Open Access Classics Serials (COACS) project will leverage the v
   
 **This repository contains:**
 
- * tba
+ * Master branch:
+   * Jupyter notebook and separate Python script to convert json files to MARC
+   * script coverting language codes to IANA
+   * awol_python3: started conversion of awol code to Python3, unfinished
+   * Output: top-level and article-level bibliographic records in MARC
+   
+ * SHL_ingest branch:
+   * Jupyter notebook with additional code to produce ids and add a project code to each record
+   * SHL_mrc: bundles of 5000 records combined into .mrc files
+   * SHL_title: individual top-level records
+   * COACS_toplevel.mrc: tidied and corrected top-level records
+
+   
